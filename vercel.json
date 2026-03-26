@@ -1,5 +1,17 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/auth/login.html" }
+    { "source": "/", "destination": "/auth/login.html" },
+    { "source": "/login", "destination": "/auth/login.html" },
+    { "source": "/signup", "destination": "/auth/signup.html" },
+    { "source": "/dashboard", "destination": "/user/dashboard.html" },
+    { "source": "/chat", "destination": "/user/chat.html" },
+    { "source": "/visits", "destination": "/user/visits.html" },
+    { "source": "/recommendations", "destination": "/user/recommendations.html" },
+    { "source": "/metrics", "destination": "/user/metrics.html" },
+    { "source": "/diets", "destination": "/user/diets.html" },
+    { "source": "/home", "destination": "/user/home.html" },
+    { "source": "/provider", "destination": "/institution/provider-lookup.html" },
+    { "source": "/provider-record", "destination": "/institution/provider-record.html" },
+    { "source": "/nurse-vitals", "destination": "/institution/nurse-vitals.html" }
   ]
 }
