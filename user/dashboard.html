@@ -151,6 +151,20 @@
       border-color: rgba(74, 222, 128, 0.3);
     }
     .pcc-copied { color: #4ade80; font-size: 11px; font-weight: 600; font-family: var(--font-mono); }
+
+    /* Skeleton loading */
+    .skeleton {
+      background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .vital-card.loading .vital-value,
+    .vital-card.loading .vital-trend,
+    .vital-card.loading .appt-bars { opacity: 0; }
+    .vital-card.loading .vital-label { opacity: 0; }
+    .skel-line { border-radius: 6px; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
   </style>
 </head>
 <body>
@@ -200,15 +214,15 @@
 
         <!-- Quick Actions — Chat first, no Metrics, no Diets -->
         <div class="quick-actions">
-          <a href="/chat" class="quick-action-btn">
+          <a href="chat.html" class="quick-action-btn">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             <span>Chat</span>
           </a>
-          <a href="/recommendations" class="quick-action-btn">
+          <a href="recommendations.html" class="quick-action-btn">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             <span>My Plan</span>
           </a>
-          <a href="/visits" class="quick-action-btn">
+          <a href="visits.html" class="quick-action-btn">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span>History</span>
           </a>
@@ -220,30 +234,42 @@
           <div class="dash-grid" style="margin-bottom:0;">
             <div class="appt-card" onclick="EaveApp.toast('Opening appointment details...', 'default')">
               <div class="appt-header">
-                <span class="appt-label">Confirmed</span>
+                <span class="appt-label" id="appt-label">&#8203;</span>
                 <div class="appt-arrow-btn">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </div>
               </div>
-              <div class="appt-meta">
+              <div id="appt-skel-meta" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="skel-line" style="height:13px;width:55%;"></div>
+                <div class="skel-line" style="height:13px;width:35%;"></div>
+                <div class="skel-line" style="height:13px;width:25%;"></div>
+              </div>
+              <div class="appt-meta" id="appt-meta" style="display:none;">
                 <div class="appt-meta-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                  <strong>Tomorrow, 27 March 2026</strong>
+                  <strong id="appt-date">—</strong>
                 </div>
                 <div class="appt-meta-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  <strong>09:30 – 10:00 AM</strong>
+                  <strong id="appt-time">—</strong>
                 </div>
-                <div class="appt-meta-item">
+                <div class="appt-meta-item" id="appt-room">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                  Room 204
+                  —
                 </div>
               </div>
-              <div class="appt-doctor-row">
-                <div class="doc-avatar">SJ</div>
+              <div id="appt-skel-doc" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-md);padding:12px 14px;">
+                <div class="skel-line" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+                  <div class="skel-line" style="height:13px;width:50%;"></div>
+                  <div class="skel-line" style="height:10px;width:70%;"></div>
+                </div>
+              </div>
+              <div class="appt-doctor-row" id="appt-doc-row" style="display:none;">
+                <div class="doc-avatar" id="appt-doc-avatar">—</div>
                 <div class="doc-info">
-                  <div class="doc-name">Dr. Sarah Jenkins</div>
-                  <div class="doc-role">Cardiologist · Eave Health Network</div>
+                  <div class="doc-name" id="appt-doc-name">—</div>
+                  <div class="doc-role" id="appt-doc-role">—</div>
                 </div>
               </div>
             </div>
@@ -256,7 +282,7 @@
           <div class="dash-grid">
 
             <!-- Blood Pressure -->
-            <div class="vital-card">
+            <div class="vital-card loading">
               <div class="vital-card-icon">
                 <svg fill="none" stroke="#60a5fa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               </div>
@@ -283,7 +309,7 @@
             </div>
 
             <!-- Weight -->
-            <div class="vital-card">
+            <div class="vital-card loading">
               <div class="vital-card-icon">
                 <svg fill="none" stroke="#a78bfa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
               </div>
@@ -310,7 +336,7 @@
             </div>
 
             <!-- Temperature -->
-            <div class="vital-card">
+            <div class="vital-card loading">
               <div class="vital-card-icon">
                 <svg fill="none" stroke="#f87171" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6a3 3 0 016 0v13a5 5 0 11-6 0z"/></svg>
               </div>
@@ -337,7 +363,7 @@
             </div>
 
             <!-- Heart Rate -->
-            <div class="vital-card">
+            <div class="vital-card loading">
               <div class="vital-card-icon">
                 <svg fill="none" stroke="#fb923c" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
               </div>
@@ -412,7 +438,7 @@
     EaveApp.init();
 
     // ── Load real dashboard data ──────────────────────────────────────
-    (async function loadDashboard() {
+    async function loadDashboard() {
       try {
         const data = await EaveAPI.getDashboard();
 
@@ -441,10 +467,11 @@
           }
         }
 
-        // Vitals cards
+        // Vitals cards — remove skeleton, populate values
         if (data.vitals && data.vitals.length > 0) {
           const latest = data.vitals[0];
           const cards = document.querySelectorAll('.vital-card');
+          cards.forEach(c => c.classList.remove('loading'));
           if (cards[0] && latest.systolic_bp) {
             cards[0].querySelector('.vital-value').innerHTML =
               `${latest.systolic_bp}/${latest.diastolic_bp} <span class="vital-unit">mmHg</span>`;
@@ -457,44 +484,45 @@
             cards[2].querySelector('.vital-value').innerHTML =
               `${latest.weight_kg} <span class="vital-unit">kg</span>`;
           }
+          if (cards[3] && latest.temperature) {
+            cards[3].querySelector('.vital-value').innerHTML =
+              `${latest.temperature} <span class="vital-unit">°C</span>`;
+          }
+        } else {
+          document.querySelectorAll('.vital-card').forEach(c => c.classList.remove('loading'));
         }
 
-        // Upcoming appointment card
-        const apptCard = document.querySelector('.appt-card');
-        if (data.appointments && data.appointments.length > 0 && apptCard) {
+        // Upcoming appointment card — swap skeletons for real data
+        if (data.appointments && data.appointments.length > 0) {
           const appt = data.appointments[0];
-
           const dt = new Date(appt.scheduled_at);
           const dateStr = dt.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
           const timeStr = dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-          const dateEl = apptCard.querySelector('.appt-meta-item:nth-child(1) strong');
-          const timeEl = apptCard.querySelector('.appt-meta-item:nth-child(2) strong');
-          if (dateEl) dateEl.textContent = dateStr;
-          if (timeEl) timeEl.textContent = timeStr;
+          document.getElementById('appt-label').textContent = appt.status === 'scheduled' ? 'Confirmed' : appt.status;
+          document.getElementById('appt-date').textContent  = dateStr;
+          document.getElementById('appt-time').textContent  = timeStr;
 
-          const roomEl = apptCard.querySelector('.appt-meta-item:nth-child(3)');
-          if (roomEl) {
-            const room = appt.room_number || appt.department || 'TBC';
-            roomEl.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg> ${room}`;
-          }
+          const roomEl = document.getElementById('appt-room');
+          if (roomEl) roomEl.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg> ${appt.room_number || appt.department || 'TBC'}`;
 
           const doctorName = appt.medic_name || 'Your Doctor';
           const doctorRole = appt.medic_specialty || appt.department || 'Eave Health Network';
-          const initials = doctorName.replace('Dr.', '').trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const initials   = doctorName.replace('Dr.', '').trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
-          const avatarEl = apptCard.querySelector('.doc-avatar');
-          const nameEl   = apptCard.querySelector('.doc-name');
-          const roleEl   = apptCard.querySelector('.doc-role');
-          if (avatarEl) avatarEl.textContent = initials;
-          if (nameEl)   nameEl.textContent   = doctorName;
-          if (roleEl)   roleEl.textContent   = doctorRole + ' · Eave Health Network';
+          document.getElementById('appt-doc-avatar').textContent = initials;
+          document.getElementById('appt-doc-name').textContent   = doctorName;
+          document.getElementById('appt-doc-role').textContent   = doctorRole + ' · Eave Health Network';
 
-          const labelEl = apptCard.querySelector('.appt-label');
-          if (labelEl)  labelEl.textContent  = appt.status === 'scheduled' ? 'Confirmed' : appt.status;
+          // Hide skeletons, show real content
+          document.getElementById('appt-skel-meta').style.display = 'none';
+          document.getElementById('appt-skel-doc').style.display  = 'none';
+          document.getElementById('appt-meta').style.display      = 'flex';
+          document.getElementById('appt-doc-row').style.display   = 'flex';
 
-        } else if (apptCard) {
-          apptCard.innerHTML = `
+        } else {
+          // No appointments — replace card content
+          document.querySelector('.appt-card').innerHTML = `
             <div class="appt-header"><span class="appt-label">No Upcoming Appointments</span></div>
             <div style="color:var(--text-muted);font-size:13px;margin-top:8px;">
               You have no scheduled appointments. Chat with Eave to book one.
@@ -504,7 +532,15 @@
       } catch (err) {
         console.warn('Dashboard load:', err.message);
       }
-    })();
+    }
+    loadDashboard();
+
+    // ── Refetch dashboard when user tabs back (catches agent-booked appointments) ──
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadDashboard();
+      }
+    });
 
     // ── Copy patient code to clipboard ────────────────────────────────
     function copyPatientCode() {

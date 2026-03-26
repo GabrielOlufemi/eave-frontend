@@ -48,9 +48,9 @@ window.EaveNav = (function () {
             ${links}
           </nav>
           <div class="sidebar-footer">
-            <button class="sidebar-user" aria-label="User profile">
-              <div class="avatar">JD</div>
-              <span class="name">John Doe</span>
+            <button class="sidebar-user" aria-label="User profile" id="sidebar-user-btn">
+              <div class="avatar" id="sidebar-avatar">--</div>
+              <span class="name" id="sidebar-name">Loading...</span>
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
               </svg>
@@ -128,6 +128,34 @@ window.EaveNav = (function () {
     const navEl = document.createElement('div');
     navEl.innerHTML = buildBottomNav(activeKey);
     wrapper.appendChild(navEl.firstElementChild);
+
+    // Populate sidebar user info from stored session
+    populateUser();
+  }
+
+  function populateUser() {
+    // EaveAPI may not be defined yet if nav.js loads before api.js — defer
+    const tryPopulate = () => {
+      if (typeof EaveAPI === 'undefined' || !EaveAPI.getUser) {
+        setTimeout(tryPopulate, 50);
+        return;
+      }
+      const user = EaveAPI.getUser();
+      if (!user) return;
+      const avatarEl = document.getElementById('sidebar-avatar');
+      const nameEl   = document.getElementById('sidebar-name');
+      if (avatarEl && nameEl) {
+        const initials = (user.full_name || '')
+          .split(' ')
+          .filter(Boolean)
+          .map(w => w[0].toUpperCase())
+          .slice(0, 2)
+          .join('') || '??';
+        avatarEl.textContent = initials;
+        nameEl.textContent   = user.full_name || 'Unknown';
+      }
+    };
+    tryPopulate();
   }
 
   return { init };

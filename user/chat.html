@@ -397,6 +397,10 @@
         const conds = (d.conditions || []).map(c => `- ${c.condition_name}${c.notes ? ' — ' + c.notes : ''}`).join('\n') || 'None on record';
         const meds = (d.medications || []).map(m => `- ${m.drug_name} ${m.dosage || ''} — ${m.frequency || ''}`).join('\n') || 'None active';
         const appts = (d.appointments || []).map(a => `- ${a.reason || 'Appointment'} on ${a.scheduled_at}${a.medic_name ? ' with ' + a.medic_name : ''}`).join('\n') || 'None scheduled';
+        const rxNotes = (d.clinical_visits || [])
+          .filter(v => v.prescription_notes)
+          .map(v => `- ${v.visited_at ? v.visited_at.split('T')[0] : 'Unknown date'}${v.medic_name ? ' (Dr. ' + v.medic_name + ')' : ''}: ${v.prescription_notes}`)
+          .join('\n') || 'None on record';
         const scores = (d.health_scores && d.health_scores[0]) ? `Health Score: ${d.health_scores[0].score}/10` : '';
         const preds = (d.predictions && d.predictions[0]) ? `Diabetes risk: ${d.predictions[0].diabetes_risk}, Hypertension risk: ${d.predictions[0].hypertension_risk}` : '';
 
@@ -421,6 +425,9 @@ RECENT LABS:
 PRESCRIPTIONS:
 ${meds}
 
+PRESCRIPTION NOTES FROM DOCTOR VISITS:
+${rxNotes}
+
 UPCOMING:
 ${appts}
 
@@ -436,8 +443,11 @@ IMPORTANT: You already have the patient's full profile above — name, DOB, cond
     })();
 
     // ── State ──────────────────────────────────────────────────────
-    const history = [];
-    let chatStarted = false;
+    const HISTORY_KEY = 'eave_chat_history';
+    let history = (() => {
+      try { return JSON.parse(sessionStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+    })();
+    let chatStarted = history.length > 0;
 
     const ta       = document.getElementById('chat-ta');
     const sendBtn  = document.getElementById('send-btn');
@@ -529,6 +539,7 @@ IMPORTANT: You already have the patient's full profile above — name, DOB, cond
 
       addUserMsg(text);
       history.push({ role: 'user', content: text });
+      sessionStorage.setItem(HISTORY_KEY, JSON.stringify(history));
       addTyping();
 
       try {
@@ -539,6 +550,7 @@ IMPORTANT: You already have the patient's full profile above — name, DOB, cond
 
         const reply = data.reply || 'Something went wrong — please try again.';
         history.push({ role: 'assistant', content: reply });
+        sessionStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 
         removeTyping();
         addAgentMsg(reply);
@@ -569,8 +581,34 @@ IMPORTANT: You already have the patient's full profile above — name, DOB, cond
         .replace(/\n/g, '<br>');
     }
 
+    // Restore previous chat session if any
+    function restoreHistory() {
+      if (history.length === 0) return;
+      welcome.classList.add('hidden');
+      for (const msg of history) {
+        if (msg.role === 'user') {
+          const row = document.createElement('div');
+          row.className = 'msg-row user restored';
+          row.innerHTML = `<div class="msg-bubble-user">${esc(msg.content).replace(/\n/g,'<br>')}</div>`;
+          msgWrap.appendChild(row);
+        } else if (msg.role === 'assistant') {
+          const row = document.createElement('div');
+          row.className = 'msg-row agent restored';
+          row.innerHTML = `
+            <div class="msg-agent-wrap">
+              <div class="agent-avatar">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div class="msg-bubble-agent">${renderText(msg.content)}</div>
+            </div>`;
+          msgWrap.appendChild(row);
+        }
+      }
+      scrollBottom();
+    }
+
     // Focus input on load
-    window.addEventListener('load', () => ta.focus());
+    window.addEventListener('load', () => { restoreHistory(); ta.focus(); });
   </script>
 </body>
 </html>
