@@ -290,7 +290,7 @@
     </div>
 
     <div class="auth-footer">
-      Already have an account? <a href="login.html">Sign in</a>
+      Already have an account? <a href="/login">Sign in</a>
     </div>
 
   </div>
@@ -389,7 +389,7 @@
             department: null,
           };
           await EaveAPI.signup(payload, 'provider');
-          window.location.href = '../institution/provider-lookup.html';
+          EaveAPI.navigate('/provider');
         } else {
           const firstName = document.getElementById('first-name').value.trim();
           const lastName  = document.getElementById('last-name').value.trim();
@@ -411,7 +411,7 @@
             location: null,
           };
           await EaveAPI.signup(payload, 'patient');
-          window.location.href = '../user/dashboard.html';
+          EaveAPI.navigate('/dashboard');
         }
       } catch (err) {
         label.style.opacity = '1'; spinner.style.display = 'none'; btn.disabled = false;

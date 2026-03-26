@@ -7,7 +7,7 @@ window.EaveProviderNav = (function () {
 
   const DOCTOR_PAGES = [
     {
-      key: 'lookup', label: 'Patient Lookup', href: 'provider-lookup.html',
+      key: 'lookup', label: 'Patient Lookup', href: '/provider',
       icon: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>`
     },
     {
@@ -18,11 +18,11 @@ window.EaveProviderNav = (function () {
 
   const NURSE_PAGES = [
     {
-      key: 'lookup', label: 'Patient Lookup', href: 'provider-lookup.html',
+      key: 'lookup', label: 'Patient Lookup', href: '/provider',
       icon: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>`
     },
     {
-      key: 'vitals', label: 'Vitals Entry', href: 'nurse-vitals.html',
+      key: 'vitals', label: 'Vitals Entry', href: '/nurse-vitals',
       icon: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>`
     }
   ];
@@ -44,7 +44,7 @@ window.EaveProviderNav = (function () {
     const navItems = pages.map(p => {
       const badge = p.badge ? `<span class="prov-nav-badge">${p.badge}</span>` : '';
       return `
-        <button class="prov-nav-btn${p.key === activeKey ? ' active' : ''}" onclick="location.href='${p.href}'">
+        <button class="prov-nav-btn${p.key === activeKey ? ' active' : ''}" onclick="EaveAPI.navigate(p.href)">
           <div class="prov-nav-left">${p.icon}${p.label}</div>
           ${badge}
         </button>`;

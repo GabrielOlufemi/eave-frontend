@@ -17,6 +17,28 @@
 
 window.EaveAPI = (function () {
 
+  // ── Environment-aware navigation ─────────────────────────────────────────
+  const LOCAL_MAP = {
+    '/login':           '/auth/login.html',
+    '/signup':          '/auth/signup.html',
+    '/dashboard':       '/user/dashboard.html',
+    '/chat':            '/user/chat.html',
+    '/visits':          '/user/visits.html',
+    '/recommendations': '/user/recommendations.html',
+    '/metrics':         '/user/metrics.html',
+    '/diets':           '/user/diets.html',
+    '/home':            '/user/home.html',
+    '/provider':        '/institution/provider-lookup.html',
+    '/provider-record': '/institution/provider-record.html',
+    '/nurse-vitals':    '/institution/nurse-vitals.html',
+  };
+
+  function navigate(route) {
+    const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    window.location.href = isLocal ? (LOCAL_MAP[route] || route) : route;
+  }
+
+
   // ── Config ──────────────────────────────────────────────────────────
   // Change this to your deployed backend URL in production
   const BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
@@ -64,11 +86,11 @@ window.EaveAPI = (function () {
     const token = getToken();
     const user  = getUser();
     if (!token || !user) {
-      window.location.href = '../auth/login.html';
+      navigate('/login');
       return false;
     }
     if (allowedRole && user.role !== allowedRole) {
-      window.location.href = '../auth/login.html';
+      navigate('/login');
       return false;
     }
     return true;
@@ -76,7 +98,7 @@ window.EaveAPI = (function () {
 
   function logout() {
     clearToken();
-    window.location.href = '../auth/login.html';
+    navigate('/login');
   }
 
 
@@ -100,7 +122,7 @@ window.EaveAPI = (function () {
     if (res.status === 401) {
       // Token expired or invalid — force re-login
       clearToken();
-      window.location.href = '../auth/login.html';
+      navigate('/login');
       throw new Error('Session expired');
     }
 
@@ -193,7 +215,7 @@ window.EaveAPI = (function () {
 
     // Auth
     login, signup, logout,
-    requireAuth, getToken, getUser, getRole,
+    requireAuth, getToken, getUser, getRole, navigate,
 
     // Generic
     get, post, patch, del,

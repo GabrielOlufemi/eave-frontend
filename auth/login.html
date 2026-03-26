@@ -135,7 +135,7 @@
     </div>
 
     <div class="auth-footer">
-      Don't have an account? <a href="signup.html">Create one</a>
+      Don't have an account? <a href="/signup">Create one</a>
     </div>
 
   </div>
@@ -175,9 +175,9 @@
         await EaveAPI.login(email, password, selectedRole);
 
         if (selectedRole === 'provider') {
-          window.location.href = '../institution/provider-lookup.html';
+          EaveAPI.navigate('/provider');
         } else {
-          window.location.href = '../user/dashboard.html';
+          EaveAPI.navigate('/dashboard');
         }
       } catch (err) {
         btn.classList.remove('loading');

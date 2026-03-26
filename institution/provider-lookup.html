@@ -119,7 +119,7 @@
       try {
         // Verify patient exists before navigating
         await EaveAPI.lookupPatient(code.toUpperCase());
-        window.location.href = `provider-record.html?id=${encodeURIComponent(code.toUpperCase())}`;
+        EaveAPI.navigate('/provider-record?id=' + encodeURIComponent(code.toUpperCase()));
       } catch (err) {
         icon.style.display = '';
         spin.style.display = 'none';
