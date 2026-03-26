@@ -1,4 +1,5 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/auth/login.html" },
     { "source": "/login", "destination": "/auth/login.html" },
