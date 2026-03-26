@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — Eave Health</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
+</head>
+<body>
+  <div class="page-wrapper grid-bg">
+    <!-- Nav injected by ../shared/nav.js -->
+    <div class="main-content">
+      <div class="page-inner fade-in">
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+          <div class="badge">USER_DASHBOARD</div>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" onclick="EaveApp.toast('Summary generated and sent to Dr. Jenkins.', 'success')">
+            <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Generate Summary
+          </button>
+        </div>
+
+        <!-- Header -->
+        <div class="page-header">
+          <p class="subtitle">Welcome to Eave Health</p>
+          <h1>John Doe's Health Profile</h1>
+        </div>
+
+        <!-- Sections -->
+        <div class="section">
+          <h2 class="section-title">Current Vitals</h2>
+          <div class="vitals-grid">
+            <div class="vital-card">
+              <div class="vital-label">Heart Rate</div>
+              <div class="vital-value">72 <span class="vital-unit">bpm</span></div>
+            </div>
+            <div class="vital-card">
+              <div class="vital-label">Blood Pressure</div>
+              <div class="vital-value" style="font-size:22px;margin-top:14px;">120/80 <span class="vital-unit">mmHg</span></div>
+            </div>
+            <div class="vital-card">
+              <div class="vital-label">Sleep Quality</div>
+              <div class="vital-value">92 <span class="vital-unit">score</span></div>
+            </div>
+            <div class="vital-card">
+              <div class="vital-label">Active Energy</div>
+              <div class="vital-value">450 <span class="vital-unit">kcal</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title with-border">Required Activities</h2>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:4px;">
+            <li class="list-item">
+              <span class="dot">●</span>
+              <div class="item-text">
+                <strong>Cardiology Follow-up:</strong> Scheduled for Tomorrow at 09:30 AM with Dr. Sarah Jenkins. Location: Room 204. Please arrive 15 minutes early.
+              </div>
+            </li>
+            <li class="list-item">
+              <span class="dot">●</span>
+              <div class="item-text">
+                <strong>Daily Fasting Routine:</strong> Recommended to fast 12 hours prior to upcoming Lipid Profile test scheduled for this Friday. Maintain light hydration.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title with-border">Active Prescriptions</h2>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:4px;">
+            <li class="list-item">
+              <span class="dot">●</span>
+              <div class="item-text">
+                <strong>Lisinopril (10mg):</strong> Taken orally once daily. Prescribed for ongoing management of Stage 1 Hypertension by Dr. S. Jenkins. Refill available in 14 days.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script>EaveNav.init('home');</script>
+  <script src="../shared/api.js"></script>
+  <script src="../shared/app.js"></script>
+  <script>EaveApp.init();</script>
+</body>
+</html>

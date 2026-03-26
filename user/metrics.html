@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metrics — Eave Health</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
+  <style>
+    .chart-container {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .chart-svg-wrap { height: 256px; width: 100%; position: relative; }
+    .chart-legend {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper grid-bg">
+    <div class="main-content">
+      <div class="page-inner fade-in">
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+          <div class="badge">METRICS_ANALYSIS</div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="EaveApp.toast('metrics-export.json downloaded.', 'success')">Export JSON</button>
+        </div>
+
+        <!-- Header -->
+        <div class="page-header">
+          <p class="subtitle">Longitudinal Analysis</p>
+          <h1>Metrics Tracking</h1>
+        </div>
+
+        <!-- Chart -->
+        <div class="section">
+          <h2 class="section-title">Heart Rate Over Time</h2>
+          <div class="chart-container">
+            <div class="chart-svg-wrap">
+              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <!-- Grid lines -->
+                <line x1="0" y1="25" x2="100" y2="25" stroke="#1f1f1f" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <line x1="0" y1="50" x2="100" y2="50" stroke="#1f1f1f" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <line x1="0" y1="75" x2="100" y2="75" stroke="#1f1f1f" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <!-- Fill gradient -->
+                <defs>
+                  <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="white" stop-opacity="0.05"/>
+                    <stop offset="100%" stop-color="white" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 0 50 Q 15 20, 30 60 T 60 40 T 80 50 T 100 20 L 100 100 L 0 100 Z"
+                      fill="url(#fillGrad)"/>
+                <!-- Line -->
+                <path d="M 0 50 Q 15 20, 30 60 T 60 40 T 80 50 T 100 20"
+                      fill="none" stroke="white" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Data points -->
+                <circle cx="30" cy="60" r="1.5" fill="#0a0a0a" stroke="white" stroke-width="1.5"/>
+                <circle cx="60" cy="40" r="1.5" fill="#0a0a0a" stroke="white" stroke-width="1.5"/>
+                <circle cx="80" cy="50" r="1.5" fill="#0a0a0a" stroke="white" stroke-width="1.5"/>
+                <circle cx="100" cy="20" r="1.5" fill="#0a0a0a" stroke="white" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div class="chart-legend">
+              <span>Sept</span><span>Oct</span><span>Nov</span><span>Dec</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="section">
+          <h2 class="section-title with-border">Recorded Telemetry Insights</h2>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:4px;">
+            <li class="list-item">
+              <span class="dot">●</span>
+              <div class="item-text">
+                Heart rate variability remains structurally consistent. Average resting BPM dropped by <strong>4.2%</strong> following the integration of 150-minute aerobic exercises.
+              </div>
+            </li>
+            <li class="list-item">
+              <span class="dot">●</span>
+              <div class="item-text">
+                Blood Pressure fluctuations normalized to a strict <strong>118/78 mmHg</strong>. This signifies the current Lisinopril dosage is effectively calibrated.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script>EaveNav.init('metrics');</script>
+  <script src="../shared/api.js"></script>
+  <script src="../shared/app.js"></script>
+  <script>EaveApp.init();</script>
+</body>
+</html>

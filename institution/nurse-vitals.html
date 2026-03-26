@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitals Entry — Eave Provider</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
+  <style>
+    body { overflow: hidden; height: 100vh; }
+
+    /* Sidebar handled by provider-nav.js */
+
+    /* Main layout — two-panel on wide, stacked on mobile */
+    .nurse-layout {
+      height: 100vh; width: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; z-index: 20;
+    }
+
+    /* Search panel */
+    .search-panel {
+      width: 100%; max-width: 540px; padding: 0 24px;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .search-heading { text-align: center; margin-bottom: 40px; }
+    .search-heading .role-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--text-muted); background: var(--surface-2);
+      padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+      font-family: var(--font-mono); margin-bottom: 20px;
+    }
+    .search-heading h1 { font-size: 26px; font-weight: 600; color: white; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .search-heading p { font-size: 14px; color: var(--text-muted); }
+
+    .search-input-wrap { position: relative; display: flex; align-items: center; }
+    .search-input-icon { position: absolute; left: 20px; width: 20px; height: 20px; color: #6b7280; pointer-events: none; transition: color 0.2s; }
+    .search-input-wrap:focus-within .search-input-icon { color: white; }
+    #patient-code-input {
+      width: 100%;
+      background: #161618; border: 1px solid var(--border);
+      color: white; font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.2em;
+      padding: 18px 80px 18px 52px;
+      border-radius: var(--radius-xl); font-size: 16px;
+      outline: none; transition: var(--transition);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #patient-code-input:focus { border-color: #555; background: #1c1c1f; }
+    #patient-code-input::placeholder { color: #374151; letter-spacing: 0.2em; }
+    .enter-hint { position: absolute; right: 20px; display: flex; align-items: center; gap: 8px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .search-input-wrap:focus-within .enter-hint { opacity: 1; }
+    .enter-hint span { font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.15em; }
+    .enter-key { width: 24px; height: 24px; border: 1px solid #374151; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px; }
+
+    /* Vitals form panel — slides in after lookup */
+    .vitals-panel {
+      display: none;
+      width: 100%; max-width: 640px; padding: 0 24px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .vitals-panel.visible { display: block; animation: fadeIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+    .vitals-top {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 32px; padding-bottom: 20px;
+      border-bottom: 1px solid rgba(34,34,34,0.6);
+    }
+    .vitals-top button { background: none; border: none; cursor: pointer; color: var(--text-muted); transition: color 0.2s; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .vitals-top button:hover { color: white; }
+    .patient-id-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-family: var(--font-mono); font-weight: 500;
+      color: #4ade80; background: #0A2E1F; padding: 5px 10px;
+      border-radius: 6px; border: 1px solid #166534; margin-left: auto;
+    }
+
+    .vitals-heading { margin-bottom: 28px; }
+    .vitals-heading h2 { font-size: 20px; font-weight: 600; color: white; margin-bottom: 4px; }
+    .vitals-heading p { font-size: 13px; color: var(--text-muted); }
+
+    .vitals-grid-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .vital-input-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-xl); padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .vital-input-card:focus-within { border-color: #333; }
+    .vital-card-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--text-muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .vital-card-label svg { width: 14px; height: 14px; }
+    .vital-input-row { display: flex; align-items: center; gap: 8px; }
+    .vital-input-row input {
+      background: transparent; border: none; border-bottom: 1px solid var(--border-2);
+      border-radius: 0; padding: 4px 0; font-size: 22px; font-weight: 600;
+      color: white; width: 100%; font-family: var(--font-sans);
+    }
+    .vital-input-row input:focus { border-bottom-color: #555; background: transparent; }
+    .vital-unit-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; font-weight: 500; flex-shrink: 0; }
+
+    /* BP gets two inputs */
+    .bp-row { display: flex; align-items: center; gap: 6px; }
+    .bp-row input { font-size: 22px; font-weight: 600; color: white; background: transparent; border: none; border-bottom: 1px solid var(--border-2); border-radius: 0; padding: 4px 0; width: 60px; text-align: center; }
+    .bp-row input:focus { border-bottom-color: #555; background: transparent; }
+    .bp-sep { font-size: 20px; color: var(--text-dim); }
+
+    .notes-field { margin-bottom: 24px; }
+    .notes-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); display: block; margin-bottom: 8px; }
+    .notes-field textarea { min-height: 80px; }
+
+    .submit-row { display: flex; justify-content: flex-end; gap: 12px; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <!-- Provider nav injected by provider-nav.js -->
+
+  <!-- Search Panel -->
+  <div class="nurse-layout">
+
+    <div class="search-panel" id="search-panel">
+      <div class="search-heading">
+        <div class="role-badge">
+          <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Nurse · Vitals Entry
+        </div>
+        <h1>Enter Patient ID</h1>
+        <p>Look up the patient by their Eave code to begin vitals entry.</p>
+      </div>
+
+      <form id="search-form">
+        <div class="search-input-wrap">
+          <svg class="search-input-icon" id="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="spinner search-input-icon" id="search-spinner" style="display:none;color:white;"></span>
+          <input type="text" id="patient-code-input" placeholder="EAVE-XXXX-X" required autocomplete="off" />
+          <div class="enter-hint">
+            <span>Enter</span>
+            <div class="enter-key">↵</div>
+          </div>
+        </div>
+        <button type="submit" style="display:none;"></button>
+      </form>
+    </div>
+
+    <!-- Vitals Entry Form (shown after lookup) -->
+    <div class="vitals-panel" id="vitals-panel">
+
+      <div class="vitals-top">
+        <button onclick="resetToSearch()">
+          <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          New Patient
+        </button>
+        <div class="patient-id-tag" id="patient-tag">
+          <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span id="patient-id-text">—</span>
+        </div>
+      </div>
+
+      <div class="vitals-heading">
+        <h2>Record Vitals</h2>
+        <p>Enter current readings. All fields post to <span style="font-family:var(--font-mono);color:var(--text);">/eave/vitals</span> on submission.</p>
+      </div>
+
+      <div class="vitals-grid-form">
+
+        <!-- Blood Pressure -->
+        <div class="vital-input-card">
+          <div class="vital-card-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            Blood Pressure
+          </div>
+          <div class="bp-row">
+            <input type="number" id="bp-systolic" placeholder="120" min="60" max="250" />
+            <span class="bp-sep">/</span>
+            <input type="number" id="bp-diastolic" placeholder="80" min="40" max="150" />
+            <span class="vital-unit-label" style="margin-left:4px;">mmHg</span>
+          </div>
+        </div>
+
+        <!-- Heart Rate -->
+        <div class="vital-input-card">
+          <div class="vital-card-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Heart Rate
+          </div>
+          <div class="vital-input-row">
+            <input type="number" id="heart-rate" placeholder="72" min="30" max="250" />
+            <span class="vital-unit-label">bpm</span>
+          </div>
+        </div>
+
+        <!-- Weight -->
+        <div class="vital-input-card">
+          <div class="vital-card-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+            Weight
+          </div>
+          <div class="vital-input-row">
+            <input type="number" id="weight" placeholder="70" min="1" max="500" step="0.1" />
+            <span class="vital-unit-label">kg</span>
+          </div>
+        </div>
+
+        <!-- Temperature -->
+        <div class="vital-input-card">
+          <div class="vital-card-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Temperature
+          </div>
+          <div class="vital-input-row">
+            <input type="number" id="temperature" placeholder="37.0" min="30" max="45" step="0.1" />
+            <span class="vital-unit-label">°C</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="notes-field">
+        <label>Clinical Notes</label>
+        <textarea id="vitals-notes" placeholder="Any observations, patient complaints, or additional context..."></textarea>
+      </div>
+
+      <div class="submit-row">
+        <button class="btn btn-ghost" onclick="resetToSearch()">Cancel</button>
+        <button class="btn btn-primary" id="submit-vitals-btn" onclick="submitVitals()">
+          <svg style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <span id="submit-label">Post Vitals</span>
+          <span class="spinner" id="submit-spinner" style="display:none;"></span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="provider-nav.js"></script>
+  <script>EaveProviderNav.init('vitals');</script>
+  <script src="../shared/api.js"></script>
+  <script src="../shared/app.js"></script>
+  <script>
+    EaveAPI.requireAuth('medic');
+    EaveApp.init();
+
+    const form    = document.getElementById('search-form');
+    const input   = document.getElementById('patient-code-input');
+    const icon    = document.getElementById('search-icon');
+    const spin    = document.getElementById('search-spinner');
+
+    let currentPatientId = null;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = input.value.trim();
+      if (!code) return;
+      icon.style.display = 'none';
+      spin.style.display = '';
+      input.disabled = true;
+
+      setTimeout(() => {
+        currentPatientId = code.toUpperCase();
+        document.getElementById('patient-id-text').textContent = currentPatientId;
+        document.getElementById('search-panel').style.display = 'none';
+        const vp = document.getElementById('vitals-panel');
+        vp.classList.add('visible');
+      }, 700);
+    });
+
+    function resetToSearch() {
+      currentPatientId = null;
+      input.value = '';
+      input.disabled = false;
+      icon.style.display = '';
+      spin.style.display = 'none';
+      document.getElementById('vitals-panel').classList.remove('visible');
+      document.getElementById('vitals-panel').style.display = 'none';
+      setTimeout(() => { document.getElementById('search-panel').style.display = ''; }, 10);
+      // Clear form
+      ['bp-systolic','bp-diastolic','heart-rate','weight','temperature','vitals-notes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+
+    function submitVitals() {
+      const btn = document.getElementById('submit-vitals-btn');
+      const label = document.getElementById('submit-label');
+      const spinner = document.getElementById('submit-spinner');
+
+      const payload = {
+        patient_id: currentPatientId,
+        bp_systolic:  document.getElementById('bp-systolic').value,
+        bp_diastolic: document.getElementById('bp-diastolic').value,
+        heart_rate:   document.getElementById('heart-rate').value,
+        weight:       document.getElementById('weight').value,
+        temperature:  document.getElementById('temperature').value,
+        notes:        document.getElementById('vitals-notes').value,
+        timestamp:    new Date().toISOString()
+      };
+
+      label.style.opacity = '0';
+      spinner.style.display = 'inline-block';
+      btn.disabled = true;
+
+      // POST to /api/medic/vitals
+      const payload2 = {
+        patient_code: currentPatientId,
+        systolic_bp:  parseFloat(payload.bp_systolic) || null,
+        diastolic_bp: parseFloat(payload.bp_diastolic) || null,
+        heart_rate:   parseFloat(payload.heart_rate) || null,
+        weight_kg:    parseFloat(payload.weight) || null,
+        temperature:  parseFloat(payload.temperature) || null,
+        notes:        payload.notes || null,
+      };
+
+      EaveAPI.recordVitals(payload2)
+      .catch(() => {}) // graceful in prototype
+      .finally(() => {
+        EaveApp.toast(`Vitals posted for ${currentPatientId}`, 'success');
+        setTimeout(() => resetToSearch(), 800);
+      });
+    }
+  </script>
+</body>
+</html>

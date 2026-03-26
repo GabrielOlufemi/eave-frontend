@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Lookup — Eave Provider</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
+  <style>
+    body { overflow: hidden; height: 100vh; }
+
+    /* Sidebar handled by provider-nav.js */
+    .prov-avatar { width: 24px; height: 24px; background: black; border: 1px solid #374151; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; }
+
+    /* Main centered content */
+    .search-center {
+      height: 100vh; width: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; z-index: 20;
+    }
+    .search-box { width: 100%; max-width: 672px; padding: 0 32px; margin-top: -80px; }
+
+    .search-heading { text-align: center; margin-bottom: 48px; }
+    .search-heading h1 { font-size: 30px; font-weight: 500; color: white; margin-bottom: 12px; }
+    .search-heading p { font-size: 15px; color: var(--text-muted); }
+
+    .search-input-wrap { position: relative; display: flex; align-items: center; }
+    .search-input-icon { position: absolute; left: 20px; width: 20px; height: 20px; color: #6b7280; pointer-events: none; transition: color 0.2s; }
+    .search-input-wrap:focus-within .search-input-icon { color: white; }
+
+    #patient-code-input {
+      width: 100%;
+      background: #161618; border: 1px solid var(--border);
+      color: white; font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.2em;
+      padding: 20px 80px 20px 56px;
+      border-radius: var(--radius-xl); font-size: 18px;
+      outline: none; transition: var(--transition);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #patient-code-input:focus { border-color: #555; background: #1c1c1f; }
+    #patient-code-input::placeholder { color: #374151; letter-spacing: 0.2em; }
+
+    .enter-hint {
+      position: absolute; right: 20px;
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .search-input-wrap:focus-within .enter-hint { opacity: 1; }
+    .enter-hint span { font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.15em; }
+    .enter-key { width: 24px; height: 24px; border: 1px solid #374151; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px; padding-bottom: 2px; }
+
+    .help-footer { position: absolute; bottom: 24px; width: 100%; text-align: center; }
+    .help-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 500; color: #4b5563;
+      background: none; border: none; cursor: pointer; transition: color 0.2s;
+    }
+    .help-btn:hover { color: #d1d5db; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <!-- Provider nav injected by provider-nav.js -->
+
+  <!-- Main Search -->
+  <div class="search-center">
+    <div class="search-box">
+      <div class="search-heading">
+        <h1>Lookup Patient</h1>
+        <p>Enter the 10-digit Eave unique code to pull health history records.</p>
+      </div>
+
+      <form id="search-form">
+        <div class="search-input-wrap">
+          <svg class="search-input-icon" id="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="spinner search-input-icon" id="search-spinner" style="display:none;color:white;"></span>
+          <input
+            type="text"
+            id="patient-code-input"
+            placeholder="EAVE-XXXX-X"
+            required
+            autocomplete="off"
+          />
+          <div class="enter-hint">
+            <span>Enter</span>
+            <div class="enter-key">↵</div>
+          </div>
+        </div>
+        <button type="submit" style="display:none;"></button>
+      </form>
+    </div>
+
+    <div class="help-footer">
+      <button class="help-btn">
+        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Help &amp; Keyboard Shortcuts
+      </button>
+    </div>
+  </div>
+
+  <script src="../shared/api.js"></script>
+  <script>
+    EaveAPI.requireAuth('medic');
+
+    const form  = document.getElementById('search-form');
+    const input = document.getElementById('patient-code-input');
+    const icon  = document.getElementById('search-icon');
+    const spin  = document.getElementById('search-spinner');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = input.value.trim();
+      if (!code) return;
+      icon.style.display = 'none';
+      spin.style.display = '';
+      input.disabled = true;
+
+      try {
+        // Verify patient exists before navigating
+        await EaveAPI.lookupPatient(code.toUpperCase());
+        window.location.href = `provider-record.html?id=${encodeURIComponent(code.toUpperCase())}`;
+      } catch (err) {
+        icon.style.display = '';
+        spin.style.display = 'none';
+        input.disabled = false;
+        EaveApp.toast(err.message || 'Patient not found', 'error');
+      }
+    });
+  </script>
+  <script src="provider-nav.js"></script>
+  <script>EaveProviderNav.init('lookup');</script>
+  <script src="../shared/app.js"></script>
+  <script>EaveApp.init();</script>
+</body>
+</html>
