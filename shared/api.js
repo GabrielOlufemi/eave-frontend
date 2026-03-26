@@ -40,12 +40,10 @@ window.EaveAPI = (function () {
 
 
   // ── Config ──────────────────────────────────────────────────────────
-  // // Change this to your deployed backend URL in production
-  // const BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-  // ? 'https://your-backend.onrender.com'   // ← your deployed backend URL
-  // : 'http://localhost:8000';
-  
-  const BASE = 'http://localhost:8000';
+  // Change this to your deployed backend URL in production
+  const BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? 'https://eave-health-backend.onrender.com'   // ← your deployed backend URL
+  : 'http://localhost:8000';
 
   const TOKEN_KEY  = 'eave_token';
   const USER_KEY   = 'eave_user';
